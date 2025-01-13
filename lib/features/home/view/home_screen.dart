@@ -7,7 +7,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final wordProvider = Provider.of<WordProvider>(context);
+    final wordProvider = Provider.of<WordProvider>(context, listen: false);
 
     return Scaffold(
       appBar: AppBar(
@@ -21,29 +21,58 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: wordProvider.words.isEmpty
-          ? const Center(
-              child: Text('No words added yet!'),
-            )
-          : ListView.builder(
-              itemCount: wordProvider.words.length,
-              itemBuilder: (context, index) {
-                final word = wordProvider.words[index];
-                return ListTile(
-                  title: Text(word.word),
-                  subtitle: Text(word.meaning),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () {
-                      wordProvider.deleteWord(index);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Word deleted')),
-                      );
-                    },
+      body: FutureBuilder(
+        future: wordProvider.loadWords(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return const Center(child: Text('Failed to load words'));
+          }
+
+          return Consumer<WordProvider>(
+            builder: (context, provider, child) {
+              return Column(
+                children: [
+                  Expanded(
+                    child: provider.words.isEmpty
+                        ? const Center(child: Text('No words added yet!'))
+                        : ListView.builder(
+                            itemCount: provider.words.length,
+                            itemBuilder: (context, index) {
+                              final word = provider.words[index];
+                              return ListTile(
+                                title: Text(word.word),
+                                subtitle: Text(word.meaning),
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () {
+                                    provider.deleteWord(index);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Word deleted'),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              );
+                            },
+                          ),
                   ),
-                );
-              },
-            ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/training');
+                    },
+                    child: const Text('Start Training'),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }

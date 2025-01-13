@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:in_xotira/features/add_word/controller/word_provider.dart';
 import 'package:in_xotira/features/add_word/view/add_word_screen.dart';
 import 'package:in_xotira/features/home/view/home_screen.dart';
+import 'package:in_xotira/features/training/training_screen.dart';
 import 'package:provider/provider.dart';
 
 class MemorizeWordsApp extends StatelessWidget {
@@ -22,6 +23,7 @@ class MemorizeWordsApp extends StatelessWidget {
         routes: {
           '/': (context) => const HomeScreen(),
           '/add_word': (context) => const AddWordScreen(),
+          '/training': (context) => const TrainingScreen(),
         },
       ),
     );
